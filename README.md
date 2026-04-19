@@ -1,8 +1,8 @@
 # Active Noise Cancelling (Real-Time Mic Noise Suppression)
 
-> Low-latency, real-time microphone noise suppression in Python using spectral subtraction + adaptive noise tracking and 50% overlap-add (OLA). Works cross-platform with PortAudio via `sounddevice`.
+> Low-latency, real-time microphone noise suppression in Python using spectral subtraction + adaptive noise tracking and 50% overlap-add (OLA). Works cross-platform through the `sounddevice` API.
 
-https://github.com/SoheilGtex
+https://github.com/rinme
 
 ---
 
@@ -15,6 +15,9 @@ https://github.com/SoheilGtex
 - **Calibration step** (1–2 s) to capture baseline ambient noise.
 - **Low latency** (frame = 20 ms, hop = 10 ms).
 - **Pure Python + NumPy/SciPy**. No heavyweight ML runtime required.
+- **PyQt6 GUI** with start/stop controls, presets, light/dark theme, and settings persistence.
+- **Device modes** to handle duplicate device names (simple/advanced listing).
+- **Custom preset saving** from current settings via GUI dialog.
 
 > This is **noise suppression** (post-filtering of mic input), not feedforward/feedback “anti-noise” (phase-inversion) for headphones.
 
@@ -23,15 +26,15 @@ https://github.com/SoheilGtex
 ## 📦 Install
 
 ```bash
-git clone https://github.com/SoheilGtex/active-noise-cancelling.git
-cd active-noise-cancelling
+git clone https://github.com/rinme/anc-gui.git
+cd anc-gui
 python -m venv .venv && source .venv/bin/activate  # (Linux/macOS)
 # .venv\Scripts\activate                            # (Windows)
 pip install -r requirements.txt
 ```
 ## Dependencies
 
-sounddevice (PortAudio binding)
+sounddevice
 
 numpy
 
@@ -39,15 +42,23 @@ scipy
 
 pyyaml (for reading config.yaml, optional)
 
-Windows: if PortAudio devices are not listed, update your audio drivers or install WASAPI loopback support (typically not needed).
+PyQt6 (for GUI mode)
+
+`sounddevice` uses PortAudio under the hood for host I/O.
+
+Windows: if devices are not listed, update your audio drivers or install WASAPI loopback support (typically not needed).
 Linux: ensure your user is in audio group and PulseAudio/PipeWire is running.
 macOS: grant microphone permission to the terminal/IDE.
 
 ##  ▶️ Run
 
-Quick start (defaults are fine):
+CLI (legacy behavior):
 
 ```python main.py```
+
+GUI:
+
+```python main.py --gui```
 
 
 Useful options
@@ -69,7 +80,18 @@ python main.py \
 
 --highpass : cut below N Hz (0 to disable).
 
+--gui : launch the PyQt6 interface.
+
 Press Ctrl+C to stop.
+
+### GUI highlights
+
+- Built-in presets: **Quiet**, **Home**, **Home + TV Background**, **Office**, **Noisy Environment**
+- Save your own preset from current controls with **Save current as preset**
+- Device list **Modes**:
+  - **Simple**: cleaner labels with duplicate counters
+  - **Advanced**: full technical label (index, host API, channels)
+- Theme options: **System**, **Light**, **Dark**
 
 ## ⚙️ How it works (DSP)
 
@@ -103,6 +125,10 @@ ema_alpha: 0.96
 gain_smooth: 0.8
 device_in: default
 device_out: default
+selected_preset: Manual
+custom_presets: {}
+device_view_mode: simple
+theme: system
 
 ## 🧪 Benchmark notes
 
